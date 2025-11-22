@@ -1,5 +1,9 @@
 package edu.prz.techbank.masterdataset.hdfs;
 
+import edu.prz.techbank.masterdataset.exception.GeneralModuleException;
+import java.io.IOException;
+import java.util.Arrays;
+import lombok.val;
 import org.apache.hadoop.fs.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +22,7 @@ public class HdfsService {
     this.fileSystem = fileSystem;
   }
 
-  public void uploadFile(String path, MultipartFile file) throws Exception {
+  public void uploadFile(String path, MultipartFile file) {
     Path hdfsPath = new Path(path);
 
     try (FSDataOutputStream outputStream = fileSystem.create(hdfsPath, true);
@@ -29,6 +33,8 @@ public class HdfsService {
       while ((bytesRead = inputStream.read(buffer)) > 0) {
         outputStream.write(buffer, 0, bytesRead);
       }
+    } catch (IOException e) {
+      throw new GeneralModuleException("File upload error", e);
     }
   }
 
@@ -44,20 +50,38 @@ public class HdfsService {
     }
   }
 
-  public List<String> listFiles(String directory) throws Exception {
+  public List<String> listStatus(String directory) {
+    Path hdfsPath = new Path(directory);
+    try {
+      return Arrays.stream(fileSystem.listStatus(hdfsPath))
+          .map(s -> s.getPath().toString() +
+              (s.isDirectory() ? " [DIR]" : " [FILE]"))
+          .toList();
+
+    } catch (IOException e) {
+      throw new GeneralModuleException("Status listing error", e);
+    }
+  }
+
+  public List<String> listFiles(String directory, boolean recursive) {
     List<String> files = new ArrayList<>();
     Path hdfsPath = new Path(directory);
 
-    FileStatus[] fileStatuses = fileSystem.listStatus(hdfsPath);
-    for (FileStatus status : fileStatuses) {
-      files.add(status.getPath().toString() +
-          (status.isDirectory() ? " [DIR]" : " [FILE]"));
+    try {
+      val iterator = fileSystem.listFiles(hdfsPath, recursive);
+      while (iterator.hasNext()) {
+        files.add(iterator.next().toString());
+      }
+      return files;
+
+    } catch (IOException e) {
+      throw new GeneralModuleException("Error listing files", e);
     }
-    return files;
   }
 
   public boolean deleteFile(String path) throws Exception {
     Path hdfsPath = new Path(path);
-    return fileSystem.delete(hdfsPath, true); // true = recursive
+    return fileSystem.delete(hdfsPath, true);
   }
+
 }
