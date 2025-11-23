@@ -16,12 +16,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HdfsController {
 
-  private final HdfsService hdfsService;
+  final HdfsService hdfsService;
 
   @PostMapping("/upload")
-  public ResponseEntity<String> uploadFile(
-      @RequestParam("file") MultipartFile file,
-      @RequestParam("path") String path) {
+  public ResponseEntity<String> uploadFile(@RequestParam("path") String path,
+      @RequestParam("file") MultipartFile file) {
 
     hdfsService.uploadFile(path, file);
 
@@ -29,8 +28,7 @@ public class HdfsController {
   }
 
   @GetMapping("/download")
-  public ResponseEntity<Void> downloadFile(
-      @RequestParam("path") String path,
+  public ResponseEntity<Void> downloadFile(@RequestParam("path") String path,
       HttpServletResponse response) {
 
     response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + path + "\"");
@@ -51,41 +49,31 @@ public class HdfsController {
   public ResponseEntity<List<String>> listStatus(@RequestParam("directory") String directory) {
 
     List<String> files = hdfsService.listStatus(directory);
-
     return ResponseEntity.ok(files);
   }
 
   @GetMapping("/list-files")
   public ResponseEntity<List<String>> listFiles(@RequestParam("directory") String directory) {
-    try {
-      List<String> files = hdfsService.listFiles(directory, false);
-      return ResponseEntity.ok(files);
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().build();
-    }
+
+    List<String> files = hdfsService.listFiles(directory, false);
+    return ResponseEntity.ok(files);
   }
 
   @GetMapping("/list-files-recursive")
   public ResponseEntity<List<String>> listTree(@RequestParam("directory") String directory) {
-    try {
-      List<String> files = hdfsService.listFiles(directory, true);
-      return ResponseEntity.ok(files);
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().build();
-    }
+
+    List<String> files = hdfsService.listFiles(directory, true);
+    return ResponseEntity.ok(files);
   }
 
   @DeleteMapping("/delete")
-  public ResponseEntity<String> deleteFile(@RequestParam("path") String path) {
-    try {
-      boolean deleted = hdfsService.deleteFile(path);
-      if (deleted) {
-        return ResponseEntity.ok("Usunięto: " + path);
-      } else {
-        return ResponseEntity.status(404).body("Nie znaleziono pliku: " + path);
-      }
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().body("Błąd: " + e.getMessage());
+  public ResponseEntity<Void> deleteFile(@RequestParam("path") String path) {
+
+    boolean deleted = hdfsService.deleteFile(path);
+    if (deleted) {
+      return ResponseEntity.ok().build();
+    } else {
+      return ResponseEntity.notFound().build();
     }
   }
 

@@ -1,9 +1,9 @@
 package edu.prz.techbank.masterdataset.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,19 +17,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Object> handleAny(Exception e, WebRequest request) {
 
-    val description = "Internal server error";
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        e.getMessage());
 
-    val problemResponse = ProblemResponse.of(
-        "internalServerError",
-        description,
-        description,
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        e.getMessage(),
-        null);
+    log.error("Error: {}", problemDetail, e);
 
-    log.error(description, e);
-
-    return handleExceptionInternal(e, problemResponse, new HttpHeaders(),
+    return handleExceptionInternal(e, problemDetail, new HttpHeaders(),
         HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 

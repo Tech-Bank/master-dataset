@@ -3,6 +3,7 @@ package edu.prz.techbank.masterdataset.hdfs;
 import edu.prz.techbank.masterdataset.exception.GeneralModuleException;
 import java.io.IOException;
 import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.hadoop.fs.*;
 import org.springframework.stereotype.Service;
@@ -14,13 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class HdfsService {
 
-  private final FileSystem fileSystem;
-
-  public HdfsService(FileSystem fileSystem) {
-    this.fileSystem = fileSystem;
-  }
+  final FileSystem fileSystem;
 
   public void uploadFile(String path, MultipartFile file) {
     Path hdfsPath = new Path(path);
@@ -75,13 +73,17 @@ public class HdfsService {
       return files;
 
     } catch (IOException e) {
-      throw new GeneralModuleException("Error listing files", e);
+      throw new GeneralModuleException("Files listing error", e);
     }
   }
 
-  public boolean deleteFile(String path) throws Exception {
+  public boolean deleteFile(String path) {
     Path hdfsPath = new Path(path);
-    return fileSystem.delete(hdfsPath, true);
+    try {
+      return fileSystem.delete(hdfsPath, true);
+    } catch (IOException e) {
+      throw new GeneralModuleException("File deleting error", e);
+    }
   }
 
 }
