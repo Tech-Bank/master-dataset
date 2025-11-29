@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.apache.hadoop:hadoop-hdfs:3.4.1'
     implementation 'org.apache.hadoop:hadoop-hdfs-client:3.4.1'
     implementation 'org.apache.avro:avro:1.12.1'
+    implementation 'org.apache.parquet:parquet-avro:1.16.0'
 }
 
 tasks.named('test') {

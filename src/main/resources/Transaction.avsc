@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "Transaction",
+  "namespace": "edu.prz.techbank.masterdataset.domain",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "sender", "type": "string"},
+    {"name": "beneficiary", "type": "string"},
+    {"name": "amount", "type": "double"},
+    {"name": "currency", "type": "string"},
+    {"name": "timestamp", "type": "long"}
+  ]
+}

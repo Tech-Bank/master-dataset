@@ -8,12 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping("/avro/transactions")
 @RequiredArgsConstructor
 @Slf4j
-public class TransactionController {
+public class AvroTransactionController {
 
-  final TransactionService transactionService;
+  final AvroTransactionService transactionService;
 
   @PostMapping
   public ResponseEntity<Void> writeTransactions(@RequestParam String path,
