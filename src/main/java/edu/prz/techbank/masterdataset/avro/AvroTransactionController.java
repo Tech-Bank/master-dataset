@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/avro/transactions")
+@RequestMapping("/api/avro/transactions")
 @RequiredArgsConstructor
 @Slf4j
 public class AvroTransactionController {
@@ -16,20 +16,30 @@ public class AvroTransactionController {
   final AvroTransactionService transactionService;
 
   @PostMapping
-  public ResponseEntity<Void> writeTransactions(@RequestParam String path,
+  public ResponseEntity<Void> writeTransactions(@RequestParam String directory,
       @RequestBody List<Transaction> transactions) {
 
-    transactionService.writeTransactions(path, transactions);
+    transactionService.writeTransactions(directory, transactions);
 
     return ResponseEntity.ok().build();
   }
 
   @GetMapping
-  public ResponseEntity<List<Transaction>> readTransactions(@RequestParam String directory) {
+  public ResponseEntity<List<Transaction>> readTransactions(@RequestParam String path) {
+
+    List<Transaction> transactions = transactionService.readTransactionsFromFile(path);
+
+    log.info("Number of transactions read: {}. File: {}", transactions.size(), path);
+
+    return ResponseEntity.ok(transactions);
+  }
+
+  @GetMapping("/all")
+  public ResponseEntity<List<Transaction>> readTransactionsFromDirectory(@RequestParam String directory) {
 
     List<Transaction> transactions = transactionService.readTransactionsFromDirectory(directory);
 
-    log.info("Number of transactions read: {}. Path: {}", transactions.size(), directory);
+    log.info("Number of transactions read: {}. Directory: {}", transactions.size(), directory);
 
     return ResponseEntity.ok(transactions);
   }

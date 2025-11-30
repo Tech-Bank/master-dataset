@@ -2,6 +2,8 @@ package edu.prz.techbank.masterdataset.avro;
 
 import edu.prz.techbank.masterdataset.domain.Transaction;
 import edu.prz.techbank.masterdataset.exception.GeneralModuleException;
+import edu.prz.techbank.masterdataset.hdfs.HdfsFileUtils;
+import edu.prz.techbank.masterdataset.hdfs.HdfsFileUtils.FileType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,8 +29,10 @@ public class AvroTransactionService {
 
   final FileSystem fileSystem;
 
-  public void writeTransactions(String path, List<Transaction> transactions) {
-    Path hdfsPath = new Path(path);
+  public void writeTransactions(String directory, List<Transaction> transactions) {
+
+    Path hdfsPath = HdfsFileUtils.generateNewFilePath(directory, FileType.AVRO);
+
     try (FSDataOutputStream out = fileSystem.create(hdfsPath)) {
       DatumWriter<Transaction> dw = new SpecificDatumWriter<>(Transaction.class);
       try (DataFileWriter<Transaction> dfw = new DataFileWriter<>(dw)) {
@@ -43,7 +47,9 @@ public class AvroTransactionService {
   }
 
   public List<Transaction> readTransactionsFromDirectory(String directory) {
+
     Path hdfsPath = new Path(directory);
+
     List<Transaction> transactions = new ArrayList<>();
     try {
       val status = fileSystem.listStatus(hdfsPath);
@@ -56,6 +62,11 @@ public class AvroTransactionService {
       throw new GeneralModuleException("Transactions reading error", e);
     }
     return transactions;
+  }
+
+  public List<Transaction> readTransactionsFromFile(String path) {
+    Path hdfsPath = new Path(path);
+    return readTransactionsFromFile(hdfsPath);
   }
 
   private List<Transaction> readTransactionsFromFile(Path hdfsPath) {

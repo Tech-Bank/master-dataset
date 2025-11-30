@@ -1,6 +1,8 @@
 package edu.prz.techbank.masterdataset.hdfs;
 
 import edu.prz.techbank.masterdataset.exception.GeneralModuleException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -8,17 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-
 @RestController
-@RequestMapping("/hdfs")
+@RequestMapping("/api/hdfs")
 @RequiredArgsConstructor
 public class HdfsController {
 
   final HdfsService hdfsService;
 
-  @PostMapping("/upload")
+  @PostMapping
   public ResponseEntity<String> uploadFile(@RequestParam("path") String path,
       @RequestParam("file") MultipartFile file) {
 
@@ -27,11 +26,12 @@ public class HdfsController {
     return ResponseEntity.ok().build();
   }
 
-  @GetMapping("/download")
+  @GetMapping
   public ResponseEntity<Void> downloadFile(@RequestParam("path") String path,
       HttpServletResponse response) {
 
-    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + path + "\"");
+    response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+        "attachment; filename=\"" + path.replace('/', '-') + "\"");
     response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
     try {
@@ -66,7 +66,7 @@ public class HdfsController {
     return ResponseEntity.ok(files);
   }
 
-  @DeleteMapping("/delete")
+  @DeleteMapping
   public ResponseEntity<Void> deleteFile(@RequestParam("path") String path) {
 
     boolean deleted = hdfsService.deleteFile(path);

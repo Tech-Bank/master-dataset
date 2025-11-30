@@ -2,10 +2,11 @@ package edu.prz.techbank.masterdataset.parquet;
 
 import edu.prz.techbank.masterdataset.domain.Transaction;
 import edu.prz.techbank.masterdataset.exception.GeneralModuleException;
+import edu.prz.techbank.masterdataset.hdfs.HdfsFileUtils;
+import edu.prz.techbank.masterdataset.hdfs.HdfsFileUtils.FileType;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,10 +28,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ParquetTransactionService {
 
-  final org.apache.hadoop.conf.Configuration hadoopConfiguration;
+  private static final int TRANSACTIONS_PAGE_SIZE = 1024 * 1024;
+  private static final long TRANSACTIONS_GROUP_SIZE = 256 * 1024 * 1024L;
+
+  final org.apache.hadoop.conf.Configuration hadoopConfig;
 
   @Value("${parquet.max-records}")
   private int maxRecords;
+
+  @Value("${parquet.compression-codec}")
+  CompressionCodecName defaultCompressionCodec;
 
   private Schema schema;
 
@@ -43,16 +50,16 @@ public class ParquetTransactionService {
     this.schema = new Schema.Parser().parse(is);
   }
 
-  public void writeTransactions(String path, List<Transaction> transactions) {
+  public void writeTransactions(String directory, List<Transaction> transactions) {
 
-    Path hdfsPath = new Path(path);
+    Path hdfsPath = HdfsFileUtils.generateNewFilePath(directory, FileType.PARQUET);
 
     try (ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord>builder(hdfsPath)
         .withSchema(schema)
-        .withConf(hadoopConfiguration)
-        .withCompressionCodec(CompressionCodecName.GZIP)
-        .withPageSize(1024 * 1024)
-        .withRowGroupSize(256 * 1024 * 1024L)
+        .withConf(hadoopConfig)
+        .withCompressionCodec(defaultCompressionCodec)
+        .withPageSize(TRANSACTIONS_PAGE_SIZE)
+        .withRowGroupSize(TRANSACTIONS_GROUP_SIZE)
         .build()) {
 
       for (Transaction dto : transactions) {
@@ -72,13 +79,13 @@ public class ParquetTransactionService {
     }
   }
 
-  public void writeTransactionsUsingBuffer(String path, List<Transaction> transactions) {
+  public void writeTransactionsUsingBuffer(String directory, List<Transaction> transactions) {
 
     if (buffer.size() + transactions.size() > maxRecords) {
       log.info("Max records reached. Doing rotation.");
       val bufferToWrite = buffer;
       this.buffer = createBuffer();
-      writeTransactions(path + "/" + LocalDateTime.now(), bufferToWrite);
+      writeTransactions(directory, bufferToWrite);
     }
 
     buffer.addAll(transactions);
