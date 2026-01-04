@@ -1,6 +1,6 @@
 package edu.prz.techbank.masterdataset.avro;
 
-import edu.prz.techbank.masterdataset.domain.Transaction;
+import edu.prz.techbank.masterdataset.domain.avro.Transaction;
 import edu.prz.techbank.masterdataset.exception.GeneralModuleException;
 import edu.prz.techbank.masterdataset.hdfs.HdfsFileUtils;
 import edu.prz.techbank.masterdataset.hdfs.HdfsFileUtils.FileType;

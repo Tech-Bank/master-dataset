@@ -1,6 +1,6 @@
 package edu.prz.techbank.masterdataset.avro;
 
-import edu.prz.techbank.masterdataset.domain.Transaction;
+import edu.prz.techbank.masterdataset.domain.avro.Transaction;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

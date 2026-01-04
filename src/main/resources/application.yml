@@ -12,4 +12,4 @@ hdfs:
 
 parquet:
   max-records: 1000 # rotacja pliku po n rekordach
-  compression-codec: UNCOMPRESSED
+  compression-codec: GZIP
