@@ -83,7 +83,7 @@ public class ParquetTransactionService {
             .append("beneficiary", t.getBeneficiary())
             .append("amount", t.getAmount().doubleValue())
             .append("currency", t.getCurrency())
-//            .append("date", t.getDate().toString())
+            .append("date", date.toString())
             .append("timestamp", t.getTimestamp()));
       }
     } catch (IOException e) {
